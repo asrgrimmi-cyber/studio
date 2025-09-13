@@ -23,7 +23,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { HistoryPanel } from '@/components/history-panel';
-import { evaluateExpression } from '@/ai/flows/evaluate-expression';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -55,6 +54,7 @@ export function Calculator() {
     if (isEvaluating) return;
     setInput((prev) => {
       if (prev === 'Error') return operator;
+      // Re-add spaces around operators for local evaluation
       if (['+', '-', '*', '/'].some((op) => prev.endsWith(` ${op} `))) {
         return prev.slice(0, -3) + ` ${operator} `;
       }
@@ -67,14 +67,28 @@ export function Calculator() {
 
     setIsEvaluating(true);
     try {
-      // Basic validation to prevent GenAI calls for trivial invalid inputs
+      // Sanitize and prepare expression for local evaluation
+      let expression = input
+        .replace(/\^/g, '**') // Replace ^ with ** for exponentiation
+        .replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)'); // Handle sqrt()
+      
+      // Basic validation
+      if (/[^0-9+\-*/().\s^Mathsqrt]/.test(expression)) {
+          throw new Error("Invalid characters in expression.");
+      }
       if (/\/ 0(?!\.)/.test(input)) {
         throw new Error("Division by zero is not allowed.");
       }
 
-      const result = await evaluateExpression({ expression: input });
-      setHistory((prev) => [...prev, { expression: input, result: result.result }]);
-      setInput(String(result.result));
+      // Use a safer evaluation method than direct eval()
+      const result = new Function('return ' + expression)();
+
+      if (typeof result !== 'number' || !isFinite(result)) {
+        throw new Error("Invalid calculation result.");
+      }
+      
+      setHistory((prev) => [...prev, { expression: input, result: result }]);
+      setInput(String(result));
     } catch (error) {
       console.error(error);
       setInput('Error');
@@ -100,23 +114,27 @@ export function Calculator() {
 
   const backspace = () => {
     if (isEvaluating) return;
-    setInput((prev) => prev.length > 1 ? prev.slice(0, -1) : '0');
+    setInput((prev) => (prev.length > 1 ? prev.slice(0, -1) : '0'));
   };
 
   const handleSpecialFunction = (func: 'sqrt' | '%' | '^') => {
     if (isEvaluating) return;
-    switch(func) {
-        case 'sqrt':
-            setInput(prev => `sqrt(${prev})`);
-            break;
-        case '%':
-            setInput(prev => `(${prev}) / 100`);
-            break;
-        case '^':
-            setInput(prev => `${prev}^`);
-            break;
-    }
+    setInput((prev) => {
+        if (prev === 'Error' || prev === '0') return prev;
+        switch(func) {
+            case 'sqrt':
+                return `sqrt(${prev})`;
+            case '%':
+                // Wrap in parens for correct order of operations
+                return `(${prev}) / 100`;
+            case '^':
+                return `${prev}^`;
+            default:
+                return prev;
+        }
+    });
   };
+
 
   const buttonClass =
     'h-16 text-2xl rounded-xl transition-transform transform active:scale-95';
@@ -128,7 +146,7 @@ export function Calculator() {
           PyCalc
         </CardTitle>
         <CardDescription className="text-center">
-          AI-Powered Modern Calculator
+          A Modern Calculator
         </CardDescription>
       </CardHeader>
       <CardContent>
