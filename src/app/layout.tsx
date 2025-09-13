@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'PyCalc: AI-Powered Calculator',
-  description: 'A modern calculator app created with Firebase Studio',
+  title: 'MARI BODA CAL',
+  description: 'A modern calculator',
 };
 
 export default function RootLayout({

@@ -171,7 +171,7 @@ export function Calculator() {
     <Card className="w-full max-w-md shadow-2xl rounded-2xl border-2">
       <CardHeader>
         <CardTitle className="text-3xl font-bold text-center font-headline">
-          PyCalc
+          MARI BODA CAL
         </CardTitle>
         <CardDescription className="text-center">
           A Modern Calculator
