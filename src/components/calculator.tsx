@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Delete,
   History,
@@ -134,6 +134,34 @@ export function Calculator() {
         }
     });
   };
+  
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const { key } = event;
+      if (isEvaluating) return;
+
+      if (/[0-9.]/.test(key)) {
+        handleButtonClick(key);
+      } else if (['+', '-', '*', '/'].includes(key)) {
+        handleOperatorClick(key);
+      } else if (key === 'Enter' || key === '=') {
+        handleEquals();
+      } else if (key === 'Backspace') {
+        backspace();
+      } else if (key === 'Escape') {
+        allClear();
+      } else if (key === '%') {
+        handleSpecialFunction('%');
+      } else if (key === '^') {
+        handleSpecialFunction('^');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isEvaluating, handleButtonClick, handleOperatorClick, handleEquals, backspace, allClear, handleSpecialFunction]);
 
 
   const buttonClass =
