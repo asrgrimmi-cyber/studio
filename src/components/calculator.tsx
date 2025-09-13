@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import {
   Delete,
   History,
-  Sigma,
   Plus,
   Minus,
   X,
@@ -266,12 +265,12 @@ export function Calculator() {
           <Button variant="outline" className={buttonClass} onClick={() => handleButtonClick('3')}>3</Button>
           <Button
              variant="default"
-            className={cn(buttonClass, 'row-span-2 bg-primary hover:bg-primary/90')}
+            className={cn(buttonClass, 'row-span-2 text-3xl font-bold bg-primary hover:bg-primary/90')}
             onClick={handleEquals}
             aria-label="Equals"
             disabled={isEvaluating}
           >
-             {isEvaluating ? <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-foreground"></div> : <Sigma />}
+             {isEvaluating ? <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-foreground"></div> : '='}
           </Button>
 
           <Button variant="outline" className={cn(buttonClass, "col-span-2")} onClick={() => handleButtonClick('0')}>0</Button>
