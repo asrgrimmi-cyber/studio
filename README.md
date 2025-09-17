@@ -1,4 +1,4 @@
-# Firebase Studio
+# Akash Task Focus 
 
 This is a NextJS starter in Firebase Studio.
 
